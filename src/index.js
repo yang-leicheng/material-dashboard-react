@@ -17,6 +17,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
 import App from "App";
+import NotistackProvider from "components/NotistackProvider";
 
 // Material Dashboard 2 React Context Provider
 import { MaterialUIControllerProvider } from "context";
@@ -24,7 +25,9 @@ import { MaterialUIControllerProvider } from "context";
 ReactDOM.render(
   <BrowserRouter>
     <MaterialUIControllerProvider>
-      <App />
+      <NotistackProvider>
+        <App />
+      </NotistackProvider>
     </MaterialUIControllerProvider>
   </BrowserRouter>,
   document.getElementById("root")

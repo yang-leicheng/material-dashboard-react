@@ -16,7 +16,8 @@ Coded by www.creative-tim.com
 import { useState } from "react";
 
 // react-router-dom components
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
 
 // @mui material components
 import Card from "@mui/material/Card";
@@ -41,11 +42,31 @@ import BasicLayout from "layouts/authentication/components/BasicLayout";
 // Images
 import bgImage from "assets/images/bg-sign-in-basic.jpeg";
 
+import LoadingCover from "components/LoadingCover";
+
+import { login } from "network/auth";
+
 function Basic() {
   const [rememberMe, setRememberMe] = useState(false);
-
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
-
+  const navigate = useNavigate();
+  const login_ = async () => {
+    setLoading(true);
+    try {
+      const { token } = await login({ username, password });
+      setLoading(false);
+      enqueueSnackbar("登录成功", { variant: "success" });
+      localStorage.setItem("system-token", token);
+      navigate("/", { replace: true });
+    } catch (error) {
+      setLoading(false);
+      enqueueSnackbar(`登录失败: ${error.message}`, { variant: "error" });
+    }
+  };
   return (
     <BasicLayout image={bgImage}>
       <Card>
@@ -84,10 +105,26 @@ function Basic() {
         <MDBox pt={4} pb={3} px={3}>
           <MDBox component="form" role="form">
             <MDBox mb={2}>
-              <MDInput type="email" label="Email" fullWidth />
+              <MDInput
+                type="email"
+                label="Email"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
+                fullWidth
+              />
             </MDBox>
             <MDBox mb={2}>
-              <MDInput type="password" label="Password" fullWidth />
+              <MDInput
+                type="password"
+                label="Password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
+                fullWidth
+              />
             </MDBox>
             <MDBox display="flex" alignItems="center" ml={-1}>
               <Switch checked={rememberMe} onChange={handleSetRememberMe} />
@@ -102,7 +139,14 @@ function Basic() {
               </MDTypography>
             </MDBox>
             <MDBox mt={4} mb={1}>
-              <MDButton variant="gradient" color="info" fullWidth>
+              <MDButton
+                variant="gradient"
+                color="info"
+                fullWidth
+                onClick={async () => {
+                  await login_();
+                }}
+              >
                 sign in
               </MDButton>
             </MDBox>
@@ -124,6 +168,7 @@ function Basic() {
           </MDBox>
         </MDBox>
       </Card>
+      <LoadingCover loading={loading} />
     </BasicLayout>
   );
 }
